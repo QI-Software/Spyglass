@@ -25,11 +25,17 @@ This will compile the bot and publish it to the `Spyglass/bin/Release/netX.X/pub
 Copy the **entirety** of the folder and place it wherever you want your bot to run.
 
 ## Setting environment variables
-Currently, the only environment variable required is the database connection string:
+Currently, the only environment variable required is the database connection string.
+
+### Windows Systems
+![image](https://user-images.githubusercontent.com/25248023/129137985-81781c17-2565-42c1-b4f1-c463b85b01de.png)
+
+### Unix Systems
 ```bash
 SPYGLASS_DBCONNSTRING="Username=username;Password=password;Host=localhost;Port=5432;Database=spyglass;"
 ```
-Please refer to your OS documentation in order to set it.
+
+Please refer to your operating system's documentation.
 
 ## Starting the bot
 For Windows systems, you can simply run the `.exe`
