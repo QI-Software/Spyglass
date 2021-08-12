@@ -19,6 +19,7 @@ namespace Spyglass.Services
         {
             _client = client;
             _log = log;
+            
             var slash = _client.GetSlashCommands();
             
             slash.SlashCommandExecuted += (sender, eventArgs) =>
