@@ -29,7 +29,7 @@ namespace Spyglass.Commands
             }
             else
             {
-                user ??= await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                user ??= ctx.Member;
             }
             
             int? infractionCount = null;
