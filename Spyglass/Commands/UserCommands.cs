@@ -1,9 +1,7 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using Spyglass.Services;
 
 namespace Spyglass.Commands
@@ -20,12 +18,19 @@ namespace Spyglass.Commands
         }
         
         [SlashCommand("userinfo", "Displays information about the given user.")]
-        [SlashRequireGuild]
         public async Task GetUserInfo(InteractionContext ctx, 
             [Option("user", "The user to get information from")] DiscordUser user = null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            user ??= await ctx.Guild.GetMemberAsync(ctx.User.Id);
+
+            if (ctx.Channel.IsPrivate)
+            {
+                user ??= ctx.User;
+            }
+            else
+            {
+                user ??= await ctx.Guild.GetMemberAsync(ctx.User.Id);
+            }
             
             int? infractionCount = null;
             
