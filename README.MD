@@ -9,7 +9,7 @@ A flexible Discord moderation bot for large communities, written for the Dead Ma
 
 Once your bot account is created, you can use the following link to add it to your servers:
 ```
-https://discord.com/oauth2/authorize?client_id=INSERT_CLIENT_ID_HERE&scope=bot%20application.commands&permissions=1006890231
+https://discord.com/oauth2/authorize?client_id=INSERT_CLIENT_ID_HERE&scope=bot&20applications.commands&permissions=1006890231
 ```
 
 Do keep in mind the scopes are required for the slash commands to function properly.
