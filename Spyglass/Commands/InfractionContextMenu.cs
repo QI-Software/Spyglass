@@ -23,26 +23,27 @@ namespace Spyglass.Commands
         [ContextMenu(ApplicationCommandType.UserContextMenu, "List Infractions")]
         public async Task ContextListInfractions(ContextMenuContext ctx)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-
             var user = ctx.TargetUser;
             var query = _infractionService.GetUserInfractions(user);
             
             if (!query.Successful)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(
-                    _embeds.Message($"Failed to get user infractions: {query.Message}", DiscordColor.Red)));
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder {IsEphemeral = true}.AddEmbed(
+                        _embeds.Message($"Failed to get user infractions: {query.Message}", DiscordColor.Red)));
                 return;
             }
             
             if (!query.Result.Any())
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message($"{user.Username}#{user.Discriminator} has no infractions.")));
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder {IsEphemeral = true}.AddEmbed(_embeds.Message($"{user.Username}#{user.Discriminator} has no infractions.")));
             }
             else
             {
                 var embeds = await _embeds.UserInfractionsEmbeds(ctx.User, user, query.Result);
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbeds(embeds));
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder {IsEphemeral = true}.AddEmbeds(embeds));
             }
         }       
     }

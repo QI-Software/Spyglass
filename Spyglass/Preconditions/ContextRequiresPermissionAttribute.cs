@@ -21,7 +21,7 @@ namespace Spyglass.Preconditions
         public override async Task<bool> ExecuteChecksAsync(ContextMenuContext ctx)
         {
             var embeds = ctx.Services.GetRequiredService<EmbedService>();
-
+            
             if (ctx.Guild == null)
             {
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,

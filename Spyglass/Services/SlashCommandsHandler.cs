@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -33,6 +34,20 @@ namespace Spyglass.Services
             {
                 _log.Error(
                     $"SlashCommands: {args.Context.User} failed to use command '{args.Context.CommandName}' with error: {args.Exception.Message}.");
+                return Task.CompletedTask;
+            };
+            
+            slash.ContextMenuExecuted += (sender, eventArgs) =>
+            {
+                _log.Information(
+                    $"ContextMenu: {eventArgs.Context.User} used command '{eventArgs.Context.CommandName}'.");
+                return Task.CompletedTask;
+            };
+
+            slash.ContextMenuErrored += (sender, args) =>
+            {
+                _log.Error(
+                    $"ContextMenu: {args.Context.User} failed to use command '{args.Context.CommandName}' with error: {args.Exception.Message}.");
                 return Task.CompletedTask;
             };
 
