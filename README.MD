@@ -46,7 +46,7 @@ The first argument is the only required one, and is the path in which the config
 On first startup, you will be asked if you want to create the config file. Type in `y` to generate one. 
 Open the generated file and set the `Token` to your bot's token.
 
-Everything else can be configured using the bot itself, so I recommend leave it as is.
+Everything else can be configured using the bot itself, so I recommend leave to it as is.
 
 ## Database setup
 The bot only requires a user account, the ability to connect to the database server and the permission to create a database. On startup, it will create and update the database as it sees fit using EFCore's migration system. 
