@@ -3,7 +3,7 @@ A flexible Discord moderation bot for large communities, written for the Dead Ma
 
 ## Requirements
 
-- .NET 5 or higher
+- .NET 5 SDK or higher
 - PostgreSQL server with a user account for the bot.
 - Discord [bot account](https://discord.com/developers/)
 
