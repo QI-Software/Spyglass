@@ -50,7 +50,11 @@ dotnet exec Spyglass.exe configs/
 
 The first argument is the only required one, and is the path in which the configuration file will be created.
 On first startup, you will be asked if you want to create the config file. Type in `y` to generate one. 
-Open the generated file and set the `Token` to your bot's token.
+Open the generated file and set the `Token` to your bot's token:
+
+```json
+"Token": "YourBotTokenHere",
+```
 
 Everything else can be configured using the bot itself, so I recommend leave to it as is.
 
@@ -62,4 +66,8 @@ This is due to Discord's caching and I *technically* can't do anything about it 
 ## Database setup
 The bot only requires a user account, the ability to connect to the database server and the permission to create a database. On startup, it will create and update the database as it sees fit using EFCore's migration system. 
 
-No additional setup is required.
+## Connection terminated (4014, 'Disallowed intent(s).')
+
+You need to enable certain intents on your bot's Discord account page:
+
+![image](https://user-images.githubusercontent.com/25248023/129138612-1a8ab313-7979-4670-8d96-ff507b4a4e19.png)
