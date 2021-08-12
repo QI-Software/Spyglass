@@ -50,7 +50,7 @@ Everything else can be configured using the bot itself, so I recommend leave to 
 
 ## Why don't I see any commands?
 
-Slash commands will take upwards of one hour after the first successfull startup of the bot to appear. 
+Slash commands will take upwards of one hour after the first successful startup of the bot to appear. 
 This is due to Discord's caching and I *technically* can't do anything about it if I want commands to stay global.
 
 ## Database setup
