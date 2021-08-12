@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
@@ -7,8 +6,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
-using Spyglass.Commands;
 using Spyglass.Database;
 using Spyglass.Providers;
 using Spyglass.Services;
-using Spyglass.Utilities;
 
 namespace Spyglass
 {
@@ -118,6 +113,9 @@ namespace Spyglass
             catch (Exception e)
             {
                 _log.Error(e, $"Spyglass: An error occured while applying database migrations: {e.Message}.");
+                _log.Error("Spyglass: The bot cannot continue any further.");
+                Console.ReadLine();
+                Environment.Exit(1);
             }
             
             _client.Ready += async (sender, eventArgs) =>
