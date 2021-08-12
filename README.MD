@@ -48,6 +48,11 @@ Open the generated file and set the `Token` to your bot's token.
 
 Everything else can be configured using the bot itself, so I recommend leave to it as is.
 
+## Why don't I see any commands?
+
+Slash commands will take upwards of one hour after the first successfull startup of the bot to appear. 
+This is due to Discord's caching and I *technically* can't do anything about it if I want commands to stay global.
+
 ## Database setup
 The bot only requires a user account, the ability to connect to the database server and the permission to create a database. On startup, it will create and update the database as it sees fit using EFCore's migration system. 
 
