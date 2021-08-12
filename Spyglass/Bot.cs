@@ -68,26 +68,6 @@ namespace Spyglass
 
             Log.Logger = _log;
             
-            // Initialize the Discord client.
-            _client = new DiscordClient(new DiscordConfiguration
-            {
-                Token = _config.GetConfig().Token,
-                TokenType = TokenType.Bot,
-                LoggerFactory = new LoggerFactory().AddSerilog(),
-                Intents = DiscordIntents.All,
-            });
-
-            _services = GetServices();
-            _client.UseSlashCommands(new SlashCommandsConfiguration
-            {
-                Services = _services,
-            });
-
-            _client.UseInteractivity();
-            
-            _log.Information("Spyglass: Startup sequence initiated.");
-            InitializeServices();
-            
             // Migrate the database if it needs to.
             try
             {
@@ -118,6 +98,26 @@ namespace Spyglass
                 Environment.Exit(1);
             }
             
+            // Initialize the Discord client.
+            _client = new DiscordClient(new DiscordConfiguration
+            {
+                Token = _config.GetConfig().Token,
+                TokenType = TokenType.Bot,
+                LoggerFactory = new LoggerFactory().AddSerilog(),
+                Intents = DiscordIntents.All,
+            });
+
+            _services = GetServices();
+            _client.UseSlashCommands(new SlashCommandsConfiguration
+            {
+                Services = _services,
+            });
+
+            _client.UseInteractivity();
+            
+            _log.Information("Spyglass: Startup sequence initiated.");
+            InitializeServices();
+
             _client.Ready += async (sender, eventArgs) =>
             {
                 await sender.UpdateStatusAsync(new DiscordActivity("DM me to contact staff!", ActivityType.Playing));
