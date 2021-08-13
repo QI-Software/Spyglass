@@ -120,7 +120,16 @@ namespace Spyglass
 
             _client.Ready += async (sender, eventArgs) =>
             {
-                await sender.UpdateStatusAsync(new DiscordActivity("DM me to contact staff!", ActivityType.Playing));
+                var status = _config.GetConfig().PlayingStatus;
+
+                if (string.IsNullOrWhiteSpace(status))
+                {
+                    await sender.UpdateStatusAsync();
+                }
+                else
+                {
+                    await sender.UpdateStatusAsync(new DiscordActivity(status, ActivityType.Playing));
+                }
             };
             
             await _client.ConnectAsync();

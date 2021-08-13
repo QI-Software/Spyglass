@@ -46,12 +46,12 @@ namespace Spyglass.Services
                     iconUrl: avatar)
                 .WithColor(DiscordColor.Blurple)
                 .AddField("Created At", createdAgo, true)
-                .AddField("Mention", user.Mention)
+                .AddField("Mention", user.Mention, true)
                 .WithFooter(user.Id.ToString());
             
             if (infractionCount != null)
             {
-                embed.AddField("Infractions", $"{infractionCount.Value}", true);
+                embed.AddField("Infractions", $"{infractionCount.Value}");
             }
             
             return embed.Build();
@@ -478,6 +478,22 @@ namespace Spyglass.Services
                 .AddField("Library", $"DSharpPlus v{_client.VersionString}")
                 .WithThumbnail("https://i.imgur.com/Q8PqycD.png");
 
+            return embed.Build();
+        }
+        
+        public DiscordEmbed MemberJoined(DiscordMember member)
+        {
+            var createdAgo =
+                $"{member.CreationTimestamp:ddd dd/MMM/yy HH:MM:ss zz}\n *{Format.GetTimespanString(DateTimeOffset.Now - member.CreationTimestamp)} ago*";
+
+            var embed = new DiscordEmbedBuilder()
+                .WithAuthor($"{member.Username}#{member.Discriminator}")
+                .WithThumbnail(member.GetAvatarUrl(ImageFormat.Auto))
+                .WithFooter(member.Id.ToString())
+                .WithColor(DiscordColor.Green)
+                .AddField("Joined At", member.JoinedAt.ToString("ddd dd/MMM/yy HH:MM:ss zz"), true)
+                .AddField("Created At", createdAgo, true);
+            
             return embed.Build();
         }
     }

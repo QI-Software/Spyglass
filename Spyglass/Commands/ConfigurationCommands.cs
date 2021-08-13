@@ -14,6 +14,8 @@ namespace Spyglass.Commands
     {
         [ChoiceName("Infraction Channel")]
         InfractionChannel,
+        [ChoiceName("Member Joined Channel")]
+        MemberJoinedChannel,
     }
     
     [SlashCommandGroup("config", "A group of configuration commands for Spyglass.")]
@@ -48,6 +50,10 @@ namespace Spyglass.Commands
                     categoryName = "infraction logging";
                     config.InfractionLogChannelId = id;
                     break;
+                case ConfigurationChannelType.MemberJoinedChannel:
+                    categoryName = "member join logging";
+                    config.MemberJoinLogChannelId = id;
+                    break;
             }
 
             try
@@ -68,7 +74,7 @@ namespace Spyglass.Commands
             }
             catch (Exception e)
             {
-                _log.Error(e, $"An exception has occurred while modifying the configuration.");
+                _log.Error(e, "An exception has occurred while modifying the configuration.");
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(_embeds.Message("Failed to save configuration, contact the maintainer.", DiscordColor.Red)));
             }
@@ -155,6 +161,40 @@ namespace Spyglass.Commands
                 _log.Error(e, "An exception has occurred while modifying the configuration.");
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(_embeds.Message("Failed to save configuration, contact the maintainer.", DiscordColor.Red)));
+            }
+        }
+
+        [SlashCommand("setstatus", "Sets the bot's playing status.")]
+        public async Task SetStatusAsync(InteractionContext ctx,
+            [Option("status", "The bot's new playing status")] string status = null)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            var config = _config.GetConfig();
+            config.PlayingStatus = status;
+
+            if (string.IsNullOrWhiteSpace(config.PlayingStatus))
+            {
+                await ctx.Client.UpdateStatusAsync();
+            }
+            else
+            {
+                await ctx.Client.UpdateStatusAsync(new DiscordActivity(status, ActivityType.Playing));
+            }
+
+            try
+            {
+                await _config.SaveConfigAsync();
+                var message = string.IsNullOrWhiteSpace(config.PlayingStatus)
+                    ? "Successfully disabled my playing status."
+                    : $"Successfully set my playing status to '{config.PlayingStatus}'.";
+
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message(message, DiscordColor.Green)));
+            }
+            catch (Exception e)
+            {
+                _log.Error(e, "Failed to save configuration after setting the bot's playing status.");
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("An error has occured while saving the configuration. Please contact a maintainer.", DiscordColor.Red)));
             }
         }
     }

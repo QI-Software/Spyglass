@@ -39,25 +39,24 @@ namespace Spyglass.Services
                 if (chnl != null)
                 {
                     var embed = await _embeds.GetInfractionInformationAsync(infraction);
-                    await chnl.SendMessageAsync(embed);
+                    _ = chnl.SendMessageAsync(embed);
                 }
             }
         }
 
-        private Task OnMemberJoined(DiscordClient client, GuildMemberAddEventArgs e)
+        private async Task OnMemberJoined(DiscordClient client, GuildMemberAddEventArgs e)
         {
-            // if (e.Guild.Id != _config.GetConfig().MainGuildId)
-            // {
-            //     return;
-            // }
-            //
-            // var channel = e.Guild.GetChannel(_config.GetConfig().JoinChannelId);
-            // if (channel != null)
-            // {
-            //     await channel.SendMessageAsync(embed: _embeds.MemberJoined(e.Member));
-            // }
-
-            return Task.CompletedTask;
+            var config = _config.GetConfig();
+            if (e.Guild.Id != config.MainGuildId)
+            {
+                return;
+            }
+            
+            var channel = await DiscordUtils.TryGetChannelAsync(_client, config.MemberJoinLogChannelId);
+            if (channel != null)
+            {
+                await channel.SendMessageAsync(embed: _embeds.MemberJoined(e.Member));
+            }
         }
     }
 }

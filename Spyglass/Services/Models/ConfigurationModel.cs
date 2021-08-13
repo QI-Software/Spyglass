@@ -55,6 +55,14 @@ namespace Spyglass.Services.Models
         
         [JsonProperty]
         [DefaultValue(0)]
+        public ulong MemberJoinLogChannelId { get; set; }
+        
+        [JsonProperty]
+        [DefaultValue(0)]
         public ulong MutedRoleId { get; set; }
+        
+        [JsonProperty]
+        [DefaultValue("DM me to contact staff!")]
+        public string PlayingStatus { get; set; }
     }
 }
