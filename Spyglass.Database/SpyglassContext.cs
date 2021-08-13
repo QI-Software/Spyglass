@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Spyglass.Database.Moderation;
 using Spyglass.Database.ReactionRoles;
+using Spyglass.Database.Tags;
 
 namespace Spyglass.Database
 {
@@ -39,6 +40,7 @@ namespace Spyglass.Database
         
         public DbSet<ReactionRole> ReactionRoles { get; private set; }
         
+        public DbSet<Tag> Tags { get; private set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -66,6 +68,11 @@ namespace Spyglass.Database
                 .StartsAt(0)
                 .IncrementsBy(1)
                 .HasMin(0);
+            
+            modelBuilder.HasSequence<int>("Moderation.Tags_ID_seq")
+                .StartsAt(0)
+                .IncrementsBy(1)
+                .HasMin(0);
 
             modelBuilder.HasPostgresEnum<InfractionType>(name: "InfractionType")
                 .HasPostgresEnum<BlacklistType>(name: "BlacklistType")
@@ -90,6 +97,12 @@ namespace Spyglass.Database
                         .HasDefaultValueSql("nextval('\"Moderation.ReactionRole_ID_seq\"'::regclass)");
 
                     entity.Property(e => e.ReactionId).IsRequired(false);
+                })
+                .Entity<Tag>(entity =>
+                {
+                    entity.Property(p => p.Id)
+                        .HasDefaultValueSql("nextval('\"Moderation.Tags_ID_seq\"'::regclass)");
+                    entity.Property(p => p.LastUpdatedBy).IsRequired(false);
                 });
         }
     }

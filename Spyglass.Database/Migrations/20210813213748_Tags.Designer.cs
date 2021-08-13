@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Spyglass.Database;
@@ -10,9 +11,10 @@ using Spyglass.Database.Moderation;
 namespace Spyglass.Database.Migrations
 {
     [DbContext(typeof(SpyglassContext))]
-    partial class SpyglassContextModelSnapshot : ModelSnapshot
+    [Migration("20210813213748_Tags")]
+    partial class Tags
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

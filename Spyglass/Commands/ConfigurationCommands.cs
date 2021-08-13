@@ -40,6 +40,29 @@ namespace Spyglass.Commands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
 
+            if (channel != null)
+            {
+                if (channel.Type != ChannelType.Text)
+                {
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                        .AddEmbed(_embeds.Message($"I cannot use {channel.Mention} as it isn't a text channel.")));
+                    return;
+                }
+                
+                var self = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+                var requiredPermissions = Permissions.AccessChannels | Permissions.SendMessages;
+                var channelPerms = channel.PermissionsFor(self);
+                if (!channelPerms.HasPermission(requiredPermissions))
+                {
+                    var missingPerms = requiredPermissions & ~channelPerms;
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                        .AddEmbed(_embeds.Message(
+                            $"I cannot use {channel.Mention} as a logging channel because I am missing the following permissions: {missingPerms.ToPermissionString()}")));
+
+                    return;
+                }
+            }
+
             var config = _config.GetConfig();
             var id = channel?.Id ?? 0;
             var categoryName = "";

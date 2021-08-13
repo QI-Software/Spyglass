@@ -64,5 +64,9 @@ namespace Spyglass.Services.Models
         [JsonProperty]
         [DefaultValue("DM me to contact staff!")]
         public string PlayingStatus { get; set; }
+        
+        [JsonProperty]
+        [DefaultValue('$')]
+        public char? TagPrefix { get; set; }
     }
 }

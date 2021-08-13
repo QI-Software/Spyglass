@@ -157,7 +157,8 @@ namespace Spyglass
                 .AddSingleton<ReactionRoleService>()
                 .AddSingleton<EntryGateService>()
                 .AddSingleton<BlacklistService>()
-                .AddSingleton<MailService>();
+                .AddSingleton<MailService>()
+                .AddSingleton<TagService>();
 
             return collectionBuilder.BuildServiceProvider();
         }
@@ -165,15 +166,11 @@ namespace Spyglass
         private void InitializeServices()
         {
             _services.GetRequiredService<SlashCommandsHandler>();
-
             _services.GetRequiredService<ModerationsService>().Start();
-            
             _services.GetRequiredService<ReactionRoleService>().Initialize();
-
             _services.GetRequiredService<EntryGateService>();
-
             _services.GetRequiredService<BlacklistService>().InvalidateCache();
-
+            _services.GetRequiredService<TagService>().InvalidateCache();
             _services.GetRequiredService<MailService>();
         }
     }

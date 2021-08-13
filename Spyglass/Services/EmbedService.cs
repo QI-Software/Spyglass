@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using Spyglass.Database.Moderation;
+using Spyglass.Database.Tags;
 using Spyglass.Providers;
 using Spyglass.Utilities;
 
@@ -494,6 +495,34 @@ namespace Spyglass.Services
                 .AddField("Joined At", member.JoinedAt.ToString("ddd dd/MMM/yy HH:MM:ss zz"), true)
                 .AddField("Created At", createdAgo, true);
             
+            return embed.Build();
+        }
+
+        public async Task<DiscordEmbed> GetTagInformationAsync(DiscordUser requester, Tag tag)
+        {
+            var creator = await DiscordUtils.TryGetUserAsync(_client, tag.CreatedBy);
+            var creatorName = creator != null
+                ? $"{creator.Username}#{creator.Discriminator} ({creator.Id})"
+                : $"{tag.CreatedBy}";
+
+            var embed = new DiscordEmbedBuilder()
+                .WithAuthor($"{tag.Name} - {creatorName}")
+                .WithColor(DiscordColor.Blurple)
+                .AddField("Created At", tag.CreatedAt.ToString("ddd dd/MMM/yy HH:MM:ss zz"))
+                .AddField("Uses", $"{tag.Uses}")
+                .WithFooter($"Requested by {requester.Username}#{requester.Discriminator}");
+
+            if (tag.LastUpdatedAt != null)
+            {
+                var updatedBy = await DiscordUtils.TryGetUserAsync(_client, tag.LastUpdatedBy!.Value);
+                var updatedName = creator != null
+                    ? $"{updatedBy.Username}#{updatedBy.Discriminator} ({creator.Id})"
+                    : $"{tag.LastUpdatedBy}";
+                
+                embed.AddField("Last Updated By", updatedName)
+                     .AddField("Last Updated At", tag.LastUpdatedAt.Value.ToString("ddd dd/MMM/yy HH:MM:ss zz"));
+            }
+
             return embed.Build();
         }
     }

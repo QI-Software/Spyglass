@@ -194,7 +194,7 @@ namespace Spyglass.Utilities
             if (message.Result.Content.Length > maxLength)
             {
                 await ctx.FollowUpAsync(
-                    new DiscordFollowupMessageBuilder().AddEmbed(embeds.Message($"Input is too long (max {maxLength} characters).",
+                    new DiscordFollowupMessageBuilder().AddEmbed(embeds.Message($"Input is too long (must be shorter than {maxLength + 1} characters).",
                         DiscordColor.Red)));
                 return null;
             }
