@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -470,12 +471,21 @@ namespace Spyglass.Services
 
         public DiscordEmbed AboutMeEmbed()
         {
+            var informationalVersionAttribute = Assembly.GetExecutingAssembly()
+                .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
+                .FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.InformationalVersion));
+
+            var version = informationalVersionAttribute != null
+                ? $"{informationalVersionAttribute.InformationalVersion[6..]}"
+                : "Unknown";
+            
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.Blurple)
                 .WithAuthor("About Me", iconUrl: _client.CurrentUser.GetAvatarUrl(ImageFormat.Auto))
                 .WithDescription("*I'm Spyglass, vice admiral of the Remnant Fleet and, in this case, your flexible and extensible moderation bot.*")
                 .AddField("Created By", "[Erlite#1337](https://github.com/Erlite/)")
                 .AddField("GitHub", "https://github.com/Erlite/Spyglass")
+                .AddField("Commit Hash", version)
                 .AddField("Library", $"DSharpPlus v{_client.VersionString}")
                 .WithThumbnail("https://i.imgur.com/Q8PqycD.png");
 

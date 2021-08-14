@@ -3,6 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
+        <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,5 +20,15 @@
       <ProjectReference Include="..\Spyglass.Database\Spyglass.Database.csproj" />
       <ProjectReference Include="..\Spyglass.Utilities\Spyglass.Utilities.csproj" />
     </ItemGroup>
+    
+    <Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation">
+        <Exec
+                Command="git describe --long --always --dirty --exclude=* --abbrev=16"
+                ConsoleToMSBuild="True"
+                IgnoreExitCode="False"
+        >
+            <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput"/>
+        </Exec>
+    </Target>
 
 </Project>
