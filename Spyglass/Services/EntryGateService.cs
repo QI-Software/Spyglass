@@ -12,12 +12,15 @@ namespace Spyglass.Services
     public class EntryGateService
     {
         private readonly ConfigurationService _config;
+        private readonly EmbedService _embeds;
         private readonly Logger _log;
         
-        public EntryGateService(ConfigurationService config, DiscordClient client, Logger log)
+        public EntryGateService(ConfigurationService config, EmbedService embeds, DiscordClient client, Logger log)
         {
             _config = config;
+            _embeds = embeds;
             _log = log;
+            
             client.ComponentInteractionCreated += OnComponentInteractionCreated;
         }
 
@@ -73,6 +76,15 @@ namespace Spyglass.Services
                     .AsEphemeral(true));
                 
                 _log.Information($"EntryGate: Gave access to {member.Username}#{member.Discriminator}.");
+
+                var chnl = await DiscordUtils.TryGetChannelAsync(sender, config.MemberJoinLogChannelId);
+                if (chnl != null)
+                {
+                    var builder = new DiscordMessageBuilder()
+                        .WithEmbed(_embeds.Message($"Gave {member.Username}#{member.Discriminator} the {role.Mention} role.", DiscordColor.Green));
+
+                    _ = chnl.SendMessageAsync(builder);
+                }
             }
             catch (Exception ex)
             {
@@ -80,8 +92,16 @@ namespace Spyglass.Services
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     .WithContent($"Uh oh! An error occurred while giving you the {role.Name} role. Please contact a staff member for help.")
                     .AsEphemeral(true));
+                
+                var chnl = await DiscordUtils.TryGetChannelAsync(sender, config.MemberJoinLogChannelId);
+                if (chnl != null)
+                {
+                    var builder = new DiscordMessageBuilder()
+                        .WithEmbed(_embeds.Message($"Failed to give {member.Username}#{member.Discriminator} the {role.Mention} role. Check console for more information",
+                            DiscordColor.Red));
 
-                return;
+                    _ = chnl.SendMessageAsync(builder);
+                }
             }
         }
     }
