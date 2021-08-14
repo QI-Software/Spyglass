@@ -485,7 +485,7 @@ namespace Spyglass.Services
                 .WithDescription("*I'm Spyglass, vice admiral of the Remnant Fleet and, in this case, your flexible and extensible moderation bot.*")
                 .AddField("Created By", "[Erlite#1337](https://github.com/Erlite/)")
                 .AddField("GitHub", "https://github.com/Erlite/Spyglass")
-                .AddField("Commit Hash", version)
+                .AddField("Commit Hash", $"[{version}](https://github.com/Erlite/Spyglass/commit/{version}")
                 .AddField("Library", $"DSharpPlus v{_client.VersionString}")
                 .WithThumbnail("https://i.imgur.com/Q8PqycD.png");
 
