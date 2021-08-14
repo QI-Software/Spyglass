@@ -14,7 +14,6 @@ using Spyglass.Utilities;
 namespace Spyglass.Commands
 {
     [SlashCommandGroup("tag", "Contains commands pertaining to the tag system.")]
-    [RequirePermissions(Permissions.ManageMessages)]
     public class TagCommands : ApplicationCommandModule
     {
         private readonly ConfigurationService _config;
@@ -31,6 +30,7 @@ namespace Spyglass.Commands
         }
         
         [SlashCommand("setprefix", "Set the single character prefix for tags.")]
+        [RequirePermissions(Permissions.ManageGuild)]
         public async Task SetPrefix(InteractionContext ctx,
             [Option("prefix", "The single character prefix (default is $)")] string prefix)
         {
@@ -63,6 +63,7 @@ namespace Spyglass.Commands
         }
 
         [SlashCommand("create", "Create a new tag.")]
+        [RequirePermissions(Permissions.ManageMessages)]
         public async Task CreateTag(InteractionContext ctx,
             [Option("name", "The name of the tag to create (max 32 characters)")] string name,
             [Option("value", "The value of the tag, leave empty for an interactive prompt")]  string value = null)
@@ -76,6 +77,7 @@ namespace Spyglass.Commands
         }
         
         [SlashCommand("delete", "Delete a tag from its name.")]
+        [RequirePermissions(Permissions.ManageMessages)]
         public async Task DeleteTag(InteractionContext ctx,
             [Option("name", "The name of the tag to delete.")] string name) 
         {
@@ -95,6 +97,7 @@ namespace Spyglass.Commands
         }
         
         [SlashCommand("rename", "Change a tag's name.")]
+        [RequirePermissions(Permissions.ManageMessages)]
         public async Task RenameTag(InteractionContext ctx,
             [Option("name", "The name of the tag to rename.")] string name,
             [Option("new", "The new name of the tag.")] string renameTo)
@@ -115,6 +118,7 @@ namespace Spyglass.Commands
         }
         
         [SlashCommand("update", "Change a tag's value.")]
+        [RequirePermissions(Permissions.ManageMessages)]
         public async Task UpdateTag(InteractionContext ctx,
             [Option("name", "The name of the tag to rename.")] string name,
             [Option("value", "The new value of the tag, leave empty for an interactive prompt")] string value = null)
