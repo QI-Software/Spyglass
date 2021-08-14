@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -153,7 +155,47 @@ namespace Spyglass.Commands
         [SlashCommand("list", "Lists the available tags.")]
         public async Task ListTags(InteractionContext ctx)
         {
+            var tags = _tags.CachedTags
+                .Select(t => t.Name)
+                .ToList();
+                
+            tags.Sort();
+
+            if (!tags.Any())
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_embeds.Message("There are no tags on this server.", DiscordColor.Red)));
+
+                return;
+            }
+
+            var sb = new StringBuilder();
+            var embeds = new List<DiscordEmbed>();
+            var currentEmbed = new DiscordEmbedBuilder()
+                .WithTitle($"{ctx.Guild.Name}'s tags")
+                .WithColor(DiscordColor.Blurple);
             
+            foreach (var tag in tags)
+            {
+                var currString = $"`{tag}`, ";
+
+                if (sb.Length + currString.Length <= 1024)
+                {
+                    sb.Append(currString);
+                }
+                else
+                {
+                    currentEmbed.WithDescription(sb.ToString()[..^2]);
+                    embeds.Add(currentEmbed.Build());
+                    currentEmbed = new DiscordEmbedBuilder();
+                }
+            }
+            
+            currentEmbed.WithDescription(sb.ToString()[..^2]);
+            embeds.Add(currentEmbed.Build());
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .AddEmbeds(embeds));
         }
     }
 }
