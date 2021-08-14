@@ -247,8 +247,8 @@ namespace Spyglass.Services
             var results = matches
                 .Select(m => _cachedTags.FirstOrDefault(t => t.Name.Equals(m.Groups[1].Value, StringComparison.CurrentCultureIgnoreCase)))
                 .Where(t => t is not null)
-                .Take(2)
-                .Distinct();
+                .Distinct()
+                .Take(2);
 
             foreach (var tag in results)
             {
