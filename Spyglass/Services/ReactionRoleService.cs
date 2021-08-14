@@ -172,7 +172,7 @@ namespace Spyglass.Services
                 return;
             }
 
-            if (!DiscordUtils.CanAddRoleToMember(role, memberTask.Result))
+            if (!DiscordUtils.CanAddRoleToMember(role, bot.Result))
             {
                 _log.Warning($"ReactionRoles: Cannot grant role '{role.Name}' to '{member.Username}#{member.Discriminator}': role is higher than my highest role.");
                 return;
@@ -237,7 +237,7 @@ namespace Spyglass.Services
                 return;
             }
 
-            if (!DiscordUtils.CanAddRoleToMember(role, memberTask.Result))
+            if (!DiscordUtils.CanAddRoleToMember(role, bot.Result))
             {
                 _log.Warning($"ReactionRoles: Cannot remove role '{role.Name}' from '{member.Username}#{member.Discriminator}': role is higher than my highest role.");
                 return;
