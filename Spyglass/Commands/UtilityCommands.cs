@@ -5,6 +5,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Spyglass.Preconditions;
 using Spyglass.Services;
+using Spyglass.Utilities;
 
 namespace Spyglass.Commands
 {
@@ -34,6 +35,12 @@ namespace Spyglass.Commands
             [Option("channel", "The channel to send the message to")] DiscordChannel channel,
             [Option("message", "The message to send")] string message)
         {
+            var isValidChannel = await DiscordUtils.AssertChannelType(ctx, channel, ChannelType.Text, true);
+            if (!isValidChannel)
+            {
+                return;
+            }
+            
             var interaction = new DiscordInteractionResponseBuilder {IsEphemeral = true}.WithContent("Message sent successfully.");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, interaction);
             await channel.SendMessageAsync(message);

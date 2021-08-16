@@ -202,6 +202,28 @@ namespace Spyglass.Utilities
             return message.Result.Content;
         }
 
+        public static async Task<bool> AssertChannelType(InteractionContext ctx, DiscordChannel channel, ChannelType type, bool isEphemeral = false)
+        {
+            var embeds = ctx.Services.GetRequiredService<EmbedService>();
+            if (channel == null)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder { IsEphemeral = isEphemeral }
+                    .AddEmbed(embeds.Message("An invalid channel was specified.", DiscordColor.Red)));
+
+                return false;
+            }
+
+            if (channel.Type != type)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder { IsEphemeral = isEphemeral }
+                    .AddEmbed(embeds.Message($"Channel must be of type '{Enum.GetName(type)}'.", DiscordColor.Red)));
+
+                return false;
+            }
+
+            return true;
+        }
+
         public static async Task<TimeSpan?> ConvertToTimespanAsync(InteractionContext ctx, string argument)
         {
             var embeds = ctx.Services.GetRequiredService<EmbedService>();
