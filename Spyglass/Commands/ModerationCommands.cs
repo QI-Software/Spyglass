@@ -252,7 +252,7 @@ namespace Spyglass.Commands
             }
                 
             var builder = new DiscordMessageBuilder()
-                .AddEmbed(_embeds.Message($"You have been kick from **{mainGuild.Name}** for the above reason.", DiscordColor.Red))
+                .AddEmbed(_embeds.Message($"You have been kicked from **{mainGuild.Name}** for the above reason.", DiscordColor.Red))
                 .WithContent(reason);
 
             var message = await DiscordUtils.TryMessageUserAsync(target, builder);
