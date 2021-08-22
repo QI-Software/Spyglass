@@ -60,7 +60,7 @@ namespace Spyglass.Commands
         }
 
         [SlashCommand("note", "Attaches a new note to a user's infractions.")]
-        [Preconditions.RequirePermissions(Permissions.ViewAuditLog)]
+        [RequirePermissions(Permissions.ViewAuditLog)]
         public async Task AddNoteToMember(InteractionContext ctx,
             [Option("user", "The user to add a note to.")] DiscordUser user,
             [Option("note", "The note to attach to the user. Leave empty for an interactive prompt.")] string note = null)
@@ -692,6 +692,38 @@ namespace Spyglass.Commands
                 await ctx.FollowUpAsync(
                     new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message($"Successfully unmuted {user.Username}#{user.Discriminator}. However, I was unable to log the infraction.",
                         DiscordColor.Orange)));
+            }
+        }
+
+        [SlashCommand("lock", "Prevents/allows @everyone from speaking in the current channel, as a toggle.")]
+        [RequirePermissions(Permissions.ManageMessages)]
+        [RequireBotPermissions(Permissions.ManageChannels)]
+        public async Task LockChannel(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            var everyoneOverwrite = ctx.Channel.PermissionOverwrites
+                .First(o => o.Type == OverwriteType.Role && o.Id == ctx.Guild.EveryoneRole.Id);
+
+            var level = everyoneOverwrite.CheckPermission(Permissions.SendMessages);
+
+            if (level is PermissionLevel.Allowed or PermissionLevel.Unset)
+            {
+                var allowed = everyoneOverwrite.Allowed & ~(Permissions.SendMessages);
+                var denied = everyoneOverwrite.Denied | Permissions.SendMessages;
+                
+                await ctx.Channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, allowed, denied, $"Lock command sent by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await ctx.FollowUpAsync(
+                    new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("Successfully locked this channel for @everyone.", DiscordColor.Green)));
+            }
+            else
+            {
+                var allowed = everyoneOverwrite.Allowed;
+                var denied = everyoneOverwrite.Denied & ~(Permissions.SendMessages);
+                
+                await ctx.Channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, allowed, denied, $"Lock command sent by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await ctx.FollowUpAsync(
+                    new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("Successfully unlocked this channel for @everyone.", DiscordColor.Green)));
             }
         }
     }
