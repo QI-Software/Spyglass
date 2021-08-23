@@ -161,9 +161,33 @@ namespace Spyglass.Commands
                         .AddEmbed(_embeds.Message($"Failed to save configuration after setting the new muted role to {role.Mention}.", DiscordColor.Red)));
             }
         }
+        
+        [SlashCommand("setstaffrole", "Configure the role that staff members share.")]
+        [RequireConfiguredMainGuild(true)]
+        public async Task SetStaffRole(InteractionContext ctx,
+            [Option("role", "The role to use as the staff role.")] DiscordRole role)
+        {
+            var config = _config.GetConfig();
+
+            config.StaffRoleId = role.Id;
+            try
+            {
+                await _config.SaveConfigAsync();
+                _log.Information($"{ctx.User} set the staff role to {role.Name}.");
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AddEmbed(_embeds.Message($"Successfully set {role.Mention} as the staff role.", DiscordColor.Green)));
+            }
+            catch (Exception e)
+            {
+                _log.Error(e, "Failed to save configuration after setting staff role id.");
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder()
+                        .AddEmbed(_embeds.Message($"Failed to save configuration after setting the new staff role to {role.Mention}.", DiscordColor.Red)));
+            }
+        }
 
         [SlashCommand("togglereactionroles", "Enables/disables reaction roles.")]
-        public async Task ToggleReationRoles(InteractionContext ctx)
+        public async Task ToggleReactionRoles(InteractionContext ctx)
         {
             var config = _config.GetConfig();
             config.ReactionRolesEnabled = !config.ReactionRolesEnabled;

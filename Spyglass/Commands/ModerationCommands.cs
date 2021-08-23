@@ -726,5 +726,95 @@ namespace Spyglass.Commands
                     new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("Successfully unlocked this channel for @everyone.", DiscordColor.Green)));
             }
         }
+
+        [SlashCommand("quarantine", "Hides the current channel and makes a clone.")]
+        [RequirePermissions(Permissions.ManageChannels)]
+        [RequireBotPermissions(Permissions.ManageChannels)]
+        public async Task QuarantineChannel(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            var clone = await ctx.Channel.CloneAsync($"Quarantined by {ctx.User.Username}#{ctx.User.Discriminator}.");
+            
+            // Change the current channel's name.
+            await ctx.Channel.ModifyAsync(a =>
+            {
+                a.Name = $"{ctx.Channel.Name}-quarantined";
+            });
+
+            // Move the clone to the position of the quarantined channel.
+            await clone.ModifyAsync(a =>
+            {
+                a.Position = ctx.Channel.Position;
+            });
+
+            // Forbid @everyone from accessing the channel, and any role that doesn't have Manage Channels/isn't the staff role.
+            var staffRole = ctx.Guild.GetRole(_config.GetConfig().StaffRoleId);
+
+            var badOverwrites = ctx.Channel.PermissionOverwrites
+                .Where(o => o.Type == OverwriteType.Role)
+                .Where(o => staffRole == null || ctx.Guild.GetRole(o.Id).Position < staffRole.Position)
+                .Where(o => o.Id == ctx.Guild.EveryoneRole.Id
+                            || !ctx.Guild.GetRole(o.Id).Permissions.HasPermission(Permissions.ManageChannels) &&
+                            o.CheckPermission(Permissions.AccessChannels) == PermissionLevel.Allowed)
+                .ToArray();
+
+            for (var i = badOverwrites.Length - 1; i >= 0; i--)
+            {
+                var overwrite = badOverwrites[i];
+                var allowed = overwrite.Allowed & ~(Permissions.AccessChannels);
+                var denied = overwrite.Denied | Permissions.AccessChannels;
+
+                await ctx.Channel.AddOverwriteAsync(ctx.Guild.GetRole(overwrite.Id), allowed, denied);
+            }
+
+            // Notify everyone of what just happened.
+            await clone.SendMessageAsync(_embeds.Message(
+                $"Staff members have decided to temporarily quarantine {clone.Mention}. As such, this replacement channel has been provided.", DiscordColor.Green));
+
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(
+                _embeds.Message($"This channel has been successfully quarantined. A replacement channel ({clone.Mention}) has been created.", DiscordColor.Green)));
+        }
+
+        [SlashCommand("release", "Unquarantines the current channel, using the temporary clone as a guide.")]
+        [RequirePermissions(Permissions.ManageChannels)]
+        [RequireBotPermissions(Permissions.ManageChannels)]
+        public async Task ReleaseChannel(InteractionContext ctx,
+            [Option("clone", "The clone of the quarantined channel used to revert permissions.")] DiscordChannel clone)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            var staffRole = ctx.Guild.GetRole(_config.GetConfig().StaffRoleId);
+            
+            // TODO: Remove. Blame Discord, slash command channels passed don't have the correct perm overwrites? What the fuck?
+            clone = ctx.Guild.GetChannel(clone.Id);
+            
+            // Reset the permissions to how they were originally.
+            foreach (var clonePerm in clone.PermissionOverwrites)
+            {
+                if (clonePerm.Type != OverwriteType.Role || (staffRole != null && ctx.Guild.GetRole(clonePerm.Id).Position >= staffRole.Position))
+                {
+                    continue;
+                }
+                
+                var thisPerm = ctx.Channel.PermissionOverwrites
+                    .FirstOrDefault(o => o.Id == clonePerm.Id);
+                    
+                if (thisPerm != null && (clonePerm.Allowed != thisPerm.Allowed || clonePerm.Denied != thisPerm.Denied))
+                {
+                    await thisPerm.UpdateAsync(clonePerm.Allowed, clonePerm.Denied);
+                }
+            }
+            // Remove -quarantined from the name if it is there.
+            if (ctx.Channel.Name.EndsWith("-quarantined"))
+            {
+                await ctx.Channel.ModifyAsync(a =>
+                {
+                    a.Name = ctx.Channel.Name[..^12];
+                });
+            }
+
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                .AddEmbed(_embeds.Message($"Successfully unquarantined this channel. Remember to delete {clone.Mention} if needed.", DiscordColor.Green)));
+        }
     }
 }

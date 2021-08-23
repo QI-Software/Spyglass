@@ -62,6 +62,10 @@ namespace Spyglass.Services.Models
         public ulong MutedRoleId { get; set; }
         
         [JsonProperty]
+        [DefaultValue(0)]
+        public ulong StaffRoleId { get; set; }
+        
+        [JsonProperty]
         [DefaultValue("DM me to contact staff!")]
         public string PlayingStatus { get; set; }
         
