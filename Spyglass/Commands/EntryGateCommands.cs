@@ -117,7 +117,7 @@ namespace Spyglass.Commands
             var builder = new DiscordMessageBuilder()
                 .WithContent(entryContentMessage.Result.Content)
                 .AddComponents(entryButton);
-
+            
             var entryMessage = await channel.SendMessageAsync(builder);
             config.EntryGateEnabled = true;
             config.EntryGateChannelId = channel.Id;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Serilog.Core;
 using Spyglass.Database;
@@ -250,10 +251,15 @@ namespace Spyglass.Services
                 .Distinct()
                 .Take(2);
 
+            var targetMessage = e.Message.ReferencedMessage ?? e.Message;
             foreach (var tag in results)
             {
                 _ = UpdateTagUsesAsync(tag.Id);
-                await e.Message.RespondAsync(tag.Value);
+                var builder = new DiscordMessageBuilder()
+                    .WithContent(tag.Value)
+                    .WithReply(targetMessage.Id, true);
+                
+                await targetMessage.RespondAsync(builder);
             }
         }
     }

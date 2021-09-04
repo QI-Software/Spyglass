@@ -22,12 +22,8 @@
     </ItemGroup>
     
     <Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation">
-        <Exec
-                Command="git describe --long --always --dirty --exclude=* --abbrev=16"
-                ConsoleToMSBuild="True"
-                IgnoreExitCode="False"
-        >
-            <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput"/>
+        <Exec Command="git describe --long --always --dirty --exclude=* --abbrev=16" ConsoleToMSBuild="True" IgnoreExitCode="False">
+            <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput" />
         </Exec>
     </Target>
 
