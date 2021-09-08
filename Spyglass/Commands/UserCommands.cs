@@ -54,5 +54,33 @@ namespace Spyglass.Commands
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(userInfo));
             }
         }
+        
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show User Information")]
+        public async Task ContextShowInfo(ContextMenuContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+
+            int? infractionCount = null;
+            
+            if (ctx.Member != null && ctx.Member.Permissions.HasPermission(Permissions.ViewAuditLog))
+            {
+                var infractions = _infractions.GetUserInfractions(ctx.TargetUser.Id);
+                if (infractions.Successful)
+                {
+                    infractionCount = infractions.Result.Count;
+                }
+            }
+            
+            if (ctx.TargetMember is not null)
+            {
+                var memberInfo = _embeds.MemberEmbed(ctx.TargetMember, infractionCount: infractionCount);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(memberInfo));
+            }
+            else
+            {
+                var userInfo = _embeds.UserEmbed(ctx.TargetUser, infractionCount);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(userInfo));
+            }
+        }
     }
 }

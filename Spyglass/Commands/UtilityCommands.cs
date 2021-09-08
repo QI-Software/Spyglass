@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -26,6 +28,13 @@ namespace Spyglass.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
                 new DiscordInteractionResponseBuilder().AddEmbed(_embeds.AvatarEmbed(ctx.User, user)));
+        }
+
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Display Avatar")]
+        public async Task ContextGetAvatar(ContextMenuContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
+                new DiscordInteractionResponseBuilder().AddEmbed(_embeds.AvatarEmbed(ctx.User, ctx.TargetUser)));
         }
         
         [SlashCommand("echo", "Send a message to the specified channel.")]
@@ -58,6 +67,53 @@ namespace Spyglass.Commands
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().AddEmbed(_embeds.AboutMeEmbed()));
+        }
+
+        [SlashCommand("serverinfo", "Outputs information about this server.")]
+        public async Task ServerInfo(InteractionContext ctx)
+        {
+            if (ctx.Guild == null)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_embeds.Message("This command can only be used on a server.", DiscordColor.Red)));
+
+                return;
+            }
+
+            var owner = ctx.Guild.Owner;
+            var boostTier = ctx.Guild.PremiumTier switch
+            {
+                0 => "None",
+                var tier and > 0 and <= PremiumTier.Tier_3 => $"Level {(int)tier}",
+                _ => null,
+            };
+            var members = ctx.Guild.MaxMembers.HasValue
+                ? $"{ctx.Guild.MemberCount}/{ctx.Guild.MaxMembers.Value}"
+                : $"{ctx.Guild.MemberCount}";
+            
+            var embed = new DiscordEmbedBuilder()
+                .WithAuthor($"Server Information: {ctx.Guild.Name}")
+                .WithThumbnail(ctx.Guild.IconUrl)
+                .WithColor(DiscordColor.Blurple)
+                .AddField("Owner", $"{owner.Username}#{owner.Discriminator} - {owner.Mention}", true)
+                .AddField("Created At",
+                    $"{ctx.Guild.CreationTimestamp:ddd dd/MMM/yy HH:MM:ss zz}\n *{Format.GetTimespanString(DateTimeOffset.Now - ctx.Guild.CreationTimestamp)} ago*")
+                .AddField("Members", members, true)
+                .AddField("Roles", $"{ctx.Guild.Roles.Count}", true)
+                .WithFooter($"{ctx.Guild.Id}");
+
+            if (boostTier != null)
+            {
+                embed.AddField("Nitro Boost", boostTier, true);
+            }
+
+            if (!string.IsNullOrWhiteSpace(ctx.Guild.VanityUrlCode))
+            {
+                embed.AddField("Vanity URL", ctx.Guild.VanityUrlCode);
+            }
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .AddEmbed(embed.Build()));
         }
     }
 }
