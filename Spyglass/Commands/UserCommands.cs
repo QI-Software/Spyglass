@@ -55,7 +55,7 @@ namespace Spyglass.Commands
             }
         }
         
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show User Information")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show User Info")]
         public async Task ContextShowInfo(ContextMenuContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);

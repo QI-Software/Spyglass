@@ -8,6 +8,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Spyglass.Database.Moderation;
 using Spyglass.Preconditions;
+using Spyglass.Providers;
 using Spyglass.Services;
 using Spyglass.Utilities;
 
@@ -815,6 +816,90 @@ namespace Spyglass.Commands
 
             await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
                 .AddEmbed(_embeds.Message($"Successfully unquarantined this channel. Remember to delete {clone.Mention} if needed.", DiscordColor.Green)));
+        }
+
+        [SlashCommand("prune", "Remove the specified number of messages in the current channel.")]
+        [RequirePermissions(Permissions.ManageMessages)]
+        [RequireBotPermissions(Permissions.ManageMessages)]
+        public async Task PruneMessages(InteractionContext ctx,
+            [Option("amount", "The amount of messages to delete (max 500).")] long amount)
+        {
+            if (amount <= 0)
+            {
+                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder { IsEphemeral = true }
+                    .AddEmbed(_embeds.Message("Amount must be a valid number between 0 and 500.", DiscordColor.Red)));
+                return;
+            }
+            
+            amount = Math.Clamp(amount + 1, 1, 500);
+            
+            var yesButton = new DiscordButtonComponent(ButtonStyle.Danger, "doPrune", string.Format(new PluralFormatProvider(), "Prune {0:message;messages}", amount - 1));
+            var noButton = new DiscordButtonComponent(ButtonStyle.Primary, "dontPrune", "Abort");
+
+            var builder = new DiscordInteractionResponseBuilder()
+                .AddComponents(yesButton, noButton)
+                .AddEmbed(_embeds.Message(string.Format(new PluralFormatProvider(), "You are about to prune {0:message;messages}, are you sure you want to proceed?", amount - 1), DiscordColor.Orange));
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+            var msg = await ctx.GetOriginalResponseAsync();
+            var buttonResult = await msg.WaitForButtonAsync(ctx.User, TimeSpan.FromMinutes(1));
+            await msg.ModifyAsync(new DiscordMessageBuilder().WithEmbed(builder.Embeds[0]));
+            
+            if (buttonResult.TimedOut)
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("Timed out.", DiscordColor.Red)));
+                return;
+            }
+
+            if (buttonResult.Result.Id == noButton.CustomId)
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message("Cancelled.", DiscordColor.Red)));
+                return;
+            }
+
+            var startAmount = amount;
+            var deleted = 0;
+            while (amount > 0)
+            {
+                var currentAmount = amount >= 100 ? 100 : amount;
+                amount -= 100;
+
+                var messages = await ctx.Channel.GetMessagesAsync((int)currentAmount);
+                var toDelete = messages
+                    .Where(m => DateTimeOffset.Now - m.CreationTimestamp < TimeSpan.FromDays(14))
+                    .ToArray();
+
+                var lastBatch = messages.Count != toDelete.Length;
+
+                try
+                {
+                    var len = toDelete.Length;
+                    await ctx.Channel.DeleteMessagesAsync(toDelete);
+                    deleted += len;
+                }
+                catch (Exception e)
+                {
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                        .AddEmbed(_embeds.Message($"An error has occured while deleting messages: {e.Message}.", DiscordColor.Red)));
+                    return;
+                }
+
+                if (lastBatch)
+                {
+                    break;
+                }
+            }
+
+            if (deleted == startAmount)
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message(string.Format(new PluralFormatProvider(),
+                    "Successfully deleted {0:message;messages}.", deleted - 1), DiscordColor.Green)));
+            }
+            else
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message(string.Format(new PluralFormatProvider(),
+                    "Successfully deleted {0:message;messages}. Some messages haven't been deleted as they were too old (14 days maximum).", deleted - 1), DiscordColor.Orange)));
+            }
         }
     }
 }

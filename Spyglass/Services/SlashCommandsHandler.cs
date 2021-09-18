@@ -32,7 +32,7 @@ namespace Spyglass.Services
 
             slash.SlashCommandErrored += (sender, args) =>
             {
-                _log.Error(
+                _log.Error(args.Exception,
                     $"SlashCommands: {args.Context.User} failed to use command '{args.Context.CommandName}' with error: {args.Exception.Message}.");
                 return Task.CompletedTask;
             };
@@ -46,7 +46,7 @@ namespace Spyglass.Services
 
             slash.ContextMenuErrored += (sender, args) =>
             {
-                _log.Error(
+                _log.Error(args.Exception,
                     $"ContextMenu: {args.Context.User} failed to use command '{args.Context.CommandName}' with error: {args.Exception.Message}.");
                 return Task.CompletedTask;
             };
