@@ -535,5 +535,23 @@ namespace Spyglass.Services
 
             return embed.Build();
         }
+        
+        public DiscordEmbed InviteMetadata(DiscordUser requester, DiscordInvite invite)
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithAuthor($"{invite.Guild.Name} ({invite.Guild.Id})")
+                .WithColor(DiscordColor.Green)
+                .WithFooter($"Requested by: {requester.Username}#{requester.Discriminator}")
+                .AddField("Created At", invite.Guild.CreationTimestamp.ToString("ddd dd/MMM/yy HH:MM:ss zz"), true)
+                .AddField("Channel", invite.Channel.Name, true)
+                .AddField("Uses", $"{invite.Uses}", true);
+
+            if (invite.Inviter != null)
+            {
+                embed.WithDescription($"Invited by: {invite.Inviter.Username}#{invite.Inviter.Discriminator} ({invite.Inviter.Id})");
+            }
+
+            return embed.Build();
+        }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using Serilog.Core;
 using Spyglass.Preconditions;
 using Spyglass.Services;
 using Spyglass.Utilities;
@@ -14,10 +16,12 @@ namespace Spyglass.Commands
     public class UtilityCommands : ApplicationCommandModule
     {
         private readonly EmbedService _embeds;
+        private readonly Logger _log;
 
-        public UtilityCommands(EmbedService embeds)
+        public UtilityCommands(EmbedService embeds, Logger log)
         {
             _embeds = embeds;
+            _log = log;
         }
 
         [SlashCommand("avatar", "Sends the avatar of the specified user (or yourself)")]
@@ -114,6 +118,43 @@ namespace Spyglass.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 .AddEmbed(embed.Build()));
+        }
+
+        [SlashCommand("inviteinfo", "Outputs information about an invite.")]
+        public async Task InviteInfo(InteractionContext ctx,
+            [Option("invite", "The invite to get information for.")] string invite)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            var parsed = "";
+            
+            var regex = new Regex(@"(https?:\/\/)?(www.)?(discord.(gg|io|me|li)|discordapp.com\/invite)\/(?<code>[^\s\/]+?(?=\b))");
+            var match = regex.Match(invite);
+
+            if (match.Success)
+            {
+                var group = match.Groups["code"];
+                if (group.Success)
+                {
+                    parsed = group.Value;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(parsed))
+            {
+                parsed = invite;
+            }
+
+            try
+            {
+                var inviteData = await ctx.Client.GetInviteByCodeAsync(parsed);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.InviteMetadata(ctx.User, inviteData)));
+            }
+            catch (Exception e)
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(_embeds.Message($"An error has occured while requesting invite metadata: {e.Message}",
+                    DiscordColor.Red)));
+                _log.Error(e, $"Failed to retrieve invite metadata for '{invite}'");
+            }
         }
     }
 }
